@@ -93,5 +93,4 @@ def image_urls():
 
     return send_file(file_object, mimetype='image/PNG')
 
-
 app.run()
