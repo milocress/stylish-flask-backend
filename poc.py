@@ -1,4 +1,6 @@
-from flask import Flask, send_file
+from flask import Flask, send_file, request, render_template
+import json
+import requests
 from PIL import Image
 import tensorflow as tf 
 import os
@@ -36,11 +38,26 @@ def load_image(image_url, image_size=(256, 256), preserve_aspect_ratio=True):
   img = tf.image.resize(img, image_size, preserve_aspect_ratio=True)
   return img
 
+@app.route('/form')
+def my_form():
+    return render_template('url_form.html')
 
-@app.route('/image.png')
-def image():
-    content_image_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Golden_Gate_Bridge_from_Battery_Spencer.jpg/640px-Golden_Gate_Bridge_from_Battery_Spencer.jpg'  # @param {type:"string"}
-    style_image_url = 'https://upload.wikimedia.org/wikipedia/commons/0/0a/The_Great_Wave_off_Kanagawa.jpg'  # @param {type:"string"}
+@app.route('/form', methods=['POST'])
+def my_form_post():
+    content = request.form['content url']
+    style = request.form['style url']
+
+    api_url = 'http://localhost:5000/image_urls'
+    data = {'content': content,'style':style}
+    r = requests.get(url=api_url, json=data)
+    file_object = io.BytesIO(r._content)
+
+    return send_file(file_object, mimetype='image/PNG')
+
+@app.route('/image_urls')
+def image_urls():
+    content_image_url = request.json['content'] #if key doesn't exist, returns None
+    style_image_url = request.json['style']
     output_image_size = 384  # @param {type:"integer"}
 
     # The content image size can be arbitrary.
