@@ -1,6 +1,6 @@
 import cv2
 from PIL import Image
-import tensorflow as tf 
+import tensorflow as tf
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +11,7 @@ import functools
 def slice_frames(video_file):
     """ video -> images """
     cap = cv2.VideoCapture(video_file)
-    
+
     idx = 0
     framecount = 0
     frame_skip = 10
@@ -71,18 +71,23 @@ def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
     img = tf.image.resize(img, image_size, preserve_aspect_ratio=True)
     return img
 
-def get_style_transfer(content_image_path, nframe):
-    #style_image_path = tf.keras.utils.get_file('kandinsky5.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
-    style_image_url = "https://upload.wikimedia.org/wikipedia/commons/0/0a/The_Great_Wave_off_Kanagawa.jpg"
-    style_image_path = tf.keras.utils.get_file(os.path.basename(style_image_url)[-128:], style_image_url)
+def preprocesses_style_image(style_image_url=None):
+    if not style_image_url:
+        style_image_url = "https://upload.wikimedia.org/wikipedia/commons/0/0a/The_Great_Wave_off_Kanagawa.jpg"
+        style_image_path = tf.keras.utils.get_file(os.path.basename(style_image_url)[-128:], style_image_url)
 
-    output_image_size = 384
-    content_img_size = (output_image_size, output_image_size)
-    style_img_size = (256, 256)  
-
-    content_image = load_image(content_image_path, content_img_size)
     style_image = load_image(style_image_path, style_img_size)
     style_image = tf.nn.avg_pool(style_image, ksize=[3, 3], strides=[1, 1], padding='SAME')
+
+    return style_image
+
+def get_style_transfer(content_image_path, nframe, style_image):
+    #style_image_path = tf.keras.utils.get_file('kandinsky5.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
+    output_image_size = 384
+    content_img_size = (output_image_size, output_image_size)
+    style_img_size = (256, 256)
+
+    content_image = load_image(content_image_path, content_img_size)
     # show_n([content_image, style_image], ['Content image', 'Style image'])
 
     hub_handle = 'https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2'
@@ -100,11 +105,11 @@ def get_style_transfer(content_image_path, nframe):
     img.save("output_frames/outputframe" + str(nframe) + ".jpg")
 
 def style_transfer_video(n_frames):
+    style_image = preprocesses_style_image()
     for i in range(n_frames):
         content_url = "test_frames/testframe" + str(i) + ".jpg"
-        get_style_transfer(content_url, i)
+        get_style_transfer(content_url, i, style_image)
 
 if __name__ == "__main__":
     #style_transfer_video(25)
     combine_frames()
-    
