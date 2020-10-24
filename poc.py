@@ -2,7 +2,7 @@ from flask import Flask, send_file, request, render_template
 import json
 import requests
 from PIL import Image
-import tensorflow as tf 
+import tensorflow as tf
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +27,8 @@ def crop_center(image):
 def load_image(image_url, image_size=(256, 256), preserve_aspect_ratio=True):
   """Loads and preprocesses images."""
   # Cache image file locally.
-  image_path = tf.keras.utils.get_file(os.path.basename(image_url)[-128:], image_url)
+  # image_path = tf.keras.utils.get_file(os.path.basename(image_url)[-128:], image_url)
+  image_path = tf.keras.utils.get_file('downloaded_image', image_url)
   # Load and convert to float32 numpy array, add batch dimension, and normalize to range [0, 1].
   img = plt.imread(image_path).astype(np.float32)[np.newaxis, ...]
   if img.max() > 1.0:
@@ -88,7 +89,7 @@ def image_urls():
     # write PNG in file-object
     img.save(file_object, 'PNG')
 
-    # move to beginning of file so `send_file()` it will read from start    
+    # move to beginning of file so `send_file()` it will read from start
     file_object.seek(0)
 
     return send_file(file_object, mimetype='image/PNG')
