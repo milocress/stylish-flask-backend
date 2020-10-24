@@ -31,6 +31,8 @@ def slice_frames(video_file):
     cap.release()
     cv2.destroyAllWindows()
 
+    return idx
+
 def combine_frames():
     """images -> frames"""
     image_folder = 'output_frames'
@@ -109,6 +111,12 @@ def style_transfer_video(n_frames):
     for i in range(n_frames):
         content_url = "test_frames/testframe" + str(i) + ".jpg"
         get_style_transfer(content_url, i, style_image)
+
+def style_transfer_video_file(fname):
+    n_frames = slice_frames(fname)
+    style_transfer_video(n_frames)
+    combine_frames()
+
 
 if __name__ == "__main__":
     #style_transfer_video(25)
