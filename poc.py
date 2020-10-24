@@ -12,6 +12,15 @@ import functools
 
 app = Flask(__name__)
 
+@app.route('/')
+def show_index():
+  return render_template('index.html')
+
+
+@app.route('/', methods=['GET', 'POST'])
+def show_form():
+  return render_template("url_form.html")
+
 def crop_center(image):
   """Returns a cropped square image."""
   shape = image.shape

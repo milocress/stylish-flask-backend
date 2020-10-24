@@ -1,0 +1,35 @@
+.headers
+{
+    border: none;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    color: #37327a;
+    text-align: center;
+    padding: 10px;
+}
+
+input[type=button], input[type=submit] 
+{
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    padding: 5px 15px; 
+    background: #37327a; 
+    color: white;
+    border: none;
+    text-align: center;
+    display:block;
+    cursor: pointer;
+    width: 70px;
+    height: 30px;
+    margin-right:auto; margin-left:auto;
+    border-radius: 5px;  
+}
+
+.field 
+{
+    text-align: center;
+    display: block;
+    margin-right:auto; margin-left:auto;
+    cursor: pointer;
+    width: 200px;
+    height: 30px;
+    border-radius: 5px;  
+}
