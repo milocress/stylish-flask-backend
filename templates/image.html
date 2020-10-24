@@ -3,16 +3,21 @@
 <head>
     <title>Upload files</title>
 </head>
-<h1>Upload new file here:</h1>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="../static/css/style.css">
+<h1 class="headers">Success: Uploaded File Here:</h1>
 <body>
 
     <img src="{{url_for('static', filename=filename)}}" alt="User Image">
     <!-- <img src="/static/dancing.jpg" alt="User Image"> -->
-</body>
-<form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
+<h2 class="headers">Upload new file here:</h2>
+<form action = "/upload_form" method="POST" enctype=multipart/form-data>
+    <div id = "filediv"> 
+        <input class = "inputfile" type="file" name="file" id="file" /> <br> </br>
+    </div><br> </br>
+    <input class = "bluebutton" type="submit" value="Upload" />
 </form>
+</body>
 </html>
     
     

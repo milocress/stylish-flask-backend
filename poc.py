@@ -9,24 +9,31 @@ import numpy as np
 import tensorflow_hub as hub
 import io
 import functools
+from werkzeug.utils import secure_filename
 
 import style_video
 
+dirname = os.path.dirname(__file__)
+UPLOAD_FOLDER = os.path.join(dirname, 'static/')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'mp4'}
+FILE_TYPE = {"jpg": "image", "jpeg": "image", "png": "image", "mp4": "video"}
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def show_index():
   return render_template('index.html')
 
-@app.route('/', methods=['GET', 'POST'])
-def show_form():
-  return render_template("url_form.html")
-
-@app.route('/form')
-def my_form():
+@app.route('/url_form')
+def get_url_form():
     return render_template('url_form.html')
 
-@app.route('/form', methods=['POST'])
+@app.route('/upload_form')
+def get_upload_form():
+    return render_template('upload_form.html')
+
+@app.route('/url_form', methods=['POST'])
 def my_form_post():
     content = request.form['content url']
     style = request.form['style url']
@@ -54,7 +61,42 @@ def image_urls():
     file_object = io.BytesIO()
     img.save(file_object, 'PNG')
     file_object.seek(0)
-    
+
     return send_file(file_object, mimetype='image/PNG')
+
+#================================
+#  merged from dwu upload.py
+
+# Copied from flask documentation
+def allowed_file(filename):
+    return '.' in filename and \
+           extension(filename) in ALLOWED_EXTENSIONS
+
+def extension(filename):
+	return filename.rsplit('.', 1)[1].lower()
+
+@app.route('/upload_form', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            print(filepath)
+            if FILE_TYPE[extension(file.filename)] == 'video':
+                return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
+            return render_template("image.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
+
+    return render_template("upload_form.html")
 
 app.run()

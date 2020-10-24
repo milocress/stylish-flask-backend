@@ -18,20 +18,7 @@ def allowed_file(filename):
 def extension(filename):
 	return filename.rsplit('.', 1)[1].lower()
 
-# @app.route('/success')
-# def static():
-# 	return '''
-#     <!doctype html>
-#     <p> Success! </p>
-#     <title>Upload new File</title>
-#     <h1>Upload new File</h1>
-#     <form method=post enctype=multipart/form-data>
-#       <input type=file name=file>
-#       <input type=submit value=Upload>
-#     </form>
-#     '''
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/upload_form', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -53,15 +40,7 @@ def upload_file():
                 return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
             return render_template("image.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
 
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+    return render_template("upload_form.html")
 
 if __name__ == "__main__":
 	app.run()

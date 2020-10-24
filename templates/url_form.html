@@ -7,24 +7,15 @@
 </head>
 <body>
     <h1 class="headers"> Upload URLs! </h1>
-        <form action = "/form" method="POST">
+        <form action = "/url_form" method="POST">
             <div>
                 <p class="headers"> Content Image URL (.png, .jpg)</p>
-                <input class="field" name="content url"><br> </br>
+                <input class="field" name="content url" /><br> </br>
                 <p class="headers"> Style Image URL (.png, .jpg) </p>
-                <input class="field" name="style url"><br> </br>
-                <input type="submit"><br> </br>
+                <input class="field" name="style url" /><br> </br>
+                <input class = "bluebutton" type="submit" value="Style!" /><br> </br>
             </div>
         </form>
-    <h1 class="headers"> Upload Files! </h1>
-    <img src="{{url_for('static', filename=filename)}}" alt="User Image">
-    <video controls>
-    	<source src="{{url_for('static', filename=filename)}}" type="video/mp4"></source>
-    </video>
-    <form method="POST" enctype=multipart/form-data>
-        <input type=file name=file>
-        <input type=submit value=Upload>
-    </form>
 </body>
 </html>
 
