@@ -8,6 +8,7 @@ import tensorflow_hub as hub
 import io
 import functools
 
+# VIDEO PROCESSING =====================================================
 def slice_frames(video_file):
     """ video -> images """
     cap = cv2.VideoCapture(video_file)
@@ -50,6 +51,8 @@ def combine_frames():
     cv2.destroyAllWindows()
     video.release()
 
+# /VIDEO PROCESSING ==========================================================
+
 def crop_center(image):
   """Returns a cropped square image."""
   shape = image.shape
@@ -73,8 +76,9 @@ def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
     img = tf.image.resize(img, image_size, preserve_aspect_ratio=True)
     return img
 
-def preprocesses_style_image(style_image_url=None):
-    if not style_image_url:
+def preprocesses_style_image(style_image_path=None):
+    style_img_size = (256, 256)
+    if not style_image_path:
         style_image_url = "https://upload.wikimedia.org/wikipedia/commons/0/0a/The_Great_Wave_off_Kanagawa.jpg"
         style_image_path = tf.keras.utils.get_file(os.path.basename(style_image_url)[-128:], style_image_url)
 
@@ -83,15 +87,18 @@ def preprocesses_style_image(style_image_url=None):
 
     return style_image
 
-def get_style_transfer(content_image_path, nframe, style_image):
-    #style_image_path = tf.keras.utils.get_file('kandinsky5.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
+def get_image_path_from_url(image_url):
+    image_path = tf.keras.utils.get_file(os.path.basename(image_url)[-128:], image_url)
+    return image_path
+
+def get_content_image_from_path(content_image_path):
     output_image_size = 384
     content_img_size = (output_image_size, output_image_size)
-    style_img_size = (256, 256)
-
     content_image = load_image(content_image_path, content_img_size)
-    # show_n([content_image, style_image], ['Content image', 'Style image'])
 
+    return content_image
+
+def get_style_transfer(content_image, nframe, style_image, send_image=False):
     hub_handle = 'https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2'
     hub_module = hub.load(hub_handle)
 
@@ -99,25 +106,26 @@ def get_style_transfer(content_image_path, nframe, style_image):
     stylized_image = outputs[0]
 
     img = tf.keras.preprocessing.image.array_to_img(
-        tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None)
-    # create file-object in memory
-    file_object = io.BytesIO()
+    tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None)
 
     # write PNG in file-object
-    img.save("output_frames/outputframe" + str(nframe) + ".jpg")
+    if (not send_image):
+        #img.save("output_frames/outputframe" + str(nframe) + ".jpg")
+        img.save("TEST.jpg")
+    else:
+        return img
+
+# =========================================================
 
 def style_transfer_video(n_frames):
     style_image = preprocesses_style_image()
     for i in range(n_frames):
-        content_url = "test_frames/testframe" + str(i) + ".jpg"
-        get_style_transfer(content_url, i, style_image)
+        content_path = "test_frames/testframe" + str(i) + ".jpg"
+        content_image = get_content_image_from_path(content_path)
+        get_style_transfer(content_image, i, style_image)
 
 def style_transfer_video_file(fname):
     n_frames = slice_frames(fname)
     style_transfer_video(n_frames)
     combine_frames()
-
-
-if __name__ == "__main__":
-    #style_transfer_video(25)
-    combine_frames()
+    

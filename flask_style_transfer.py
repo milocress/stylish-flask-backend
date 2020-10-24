@@ -129,7 +129,6 @@ style_path = tf.keras.utils.get_file('kandinsky5.jpg','https://storage.googleapi
 
 # In[5]:
 
-
 def load_img(path_to_img):
   max_dim = 512
   img = tf.io.read_file(path_to_img)
