@@ -6,6 +6,11 @@ __pycache__/
 # mac stuff
 .DS_STORE
 
+# stuff to fix vincent's paths
+.zshrc
+path_info.txt
+~/
+
 # C extensions
 *.so
 
