@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload files</title>
+</head>
+<h1>Upload new file here:</h1>
+<body>
+
+    <img src="{{url_for('static', filename=filename)}}" alt="User Image">
+    <!-- <img src="/static/dancing.jpg" alt="User Image"> -->
+</body>
+<form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+</form>
+</html>
+    
+    

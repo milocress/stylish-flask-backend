@@ -82,6 +82,10 @@ def image_urls():
     style_image = tf.nn.avg_pool(style_image, ksize=[3, 3], strides=[1, 1], padding='SAME')
     # show_n([content_image, style_image], ['Content image', 'Style image'])
 
+    fin = open('path_info.txt', 'r+')
+    path = fin.readline().strip()
+    if len(path) > 0:
+      os.environ['TFHUB_CACHE_DIR'] = path #Any folder that you can access
     hub_handle = 'https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2'
     hub_module = hub.load(hub_handle)
 

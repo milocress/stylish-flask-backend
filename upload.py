@@ -49,7 +49,9 @@ def upload_file():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             print(filepath)
-            return render_template("index.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
+            if FILE_TYPE[extension(file.filename)] == 'video':
+                return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
+            return render_template("image.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
 
     return '''
     <!doctype html>
