@@ -99,6 +99,10 @@ def get_content_image_from_path(content_image_path):
     return content_image
 
 def get_style_transfer(content_image, nframe, style_image, send_image=False):
+    fin = open('path_info.txt', 'r+')
+    path = fin.readline().strip()
+    if len(path) > 0:
+      os.environ['TFHUB_CACHE_DIR'] = path #Any folder that you can access
     hub_handle = 'https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2'
     hub_module = hub.load(hub_handle)
 
