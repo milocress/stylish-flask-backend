@@ -1,1 +1,1 @@
-web: python waitress_server.py --log-file -
+web: waitress-serve --call "upload:create_app"
