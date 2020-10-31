@@ -5,3 +5,5 @@ numpy
 Pillow
 tensorflow
 tensorflow-hub
+waitress
+opencv-python-headless
