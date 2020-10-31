@@ -1,0 +1,7 @@
+Flask
+Keras
+matplotlib
+numpy
+Pillow
+tensorflow
+tensorflow-hub
