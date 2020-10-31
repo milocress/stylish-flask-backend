@@ -5,3 +5,4 @@ numpy
 Pillow
 tensorflow
 tensorflow-hub
+gunicorn
