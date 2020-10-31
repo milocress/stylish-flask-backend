@@ -61,8 +61,6 @@ dependencies:
   - lz4-c=1.9.2=h79c402e_3
   - markdown=3.3.1=py37_0
   - markupsafe=1.1.1=py37h1de35cc_0
-  - matplotlib=3.3.1=0
-  - matplotlib-base=3.3.1=py37h181983e_0
   - mistune=0.8.4=py37h60d8a13_1002
   - mkl=2019.4=233
   - mkl-service=2.3.0=py37hfbe908c_0
