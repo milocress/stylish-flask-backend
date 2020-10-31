@@ -1,1 +1,1 @@
-web: python waitress_server.py --log-file -
+web: waitress-serve --port=$PORT --call "upload:create_app"
