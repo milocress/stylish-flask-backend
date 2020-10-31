@@ -1,1 +1,1 @@
-web: gunicorn poc --log-file -
+web: python waitress_server.py --log-file -
