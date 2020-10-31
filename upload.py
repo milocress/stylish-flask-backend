@@ -38,7 +38,7 @@ def my_form_post():
     content = request.form["content url"]
     style = request.form["style url"]
 
-    api_url = "http://localhost:5000/image_urls"
+    api_url = "https://stylish-videos.herokuapp.com/image_urls"
     data = {"content": content, "style": style}
     r = requests.get(url=api_url, json=data)
     file_object = io.BytesIO(r._content)
@@ -108,7 +108,7 @@ def upload_file():
             print(filepath2)
             # if FILE_TYPE[extension(file.filename)] == 'video':
             #    return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
-            api_url = "http://localhost:5000/image_uploads"
+            api_url = "https://stylish-videos.herokuapp.com/image_uploads"
             data = {"content": filepath1, "style": filepath2}
             r = requests.get(url=api_url, json=data)
             file_object = io.BytesIO(r._content)
