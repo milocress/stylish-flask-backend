@@ -72,14 +72,14 @@ def crop_center(image):
 @functools.lru_cache(maxsize=None)
 def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
     """Loads and preprocesses images."""
-    
+
     # deal with possible RGBA vs RGB issues
     png = Image.open(image_path).convert('RGBA')
     background = Image.new('RGBA', png.size, (255,255,255))
 
     img = Image.alpha_composite(background, png).convert('RGB')
     img = np.array([np.asarray(img)])
-    
+
     if img.max() > 1.0:
         img = img / 255.0
     if len(img.shape) == 3:
@@ -119,10 +119,14 @@ def get_content_image_from_path(content_image_path):
 
 
 def get_style_transfer(content_image, nframe, style_image, send_image=False):
-    fin = open("path_info.txt", "r+")
-    path = fin.readline().strip()
-    if len(path) > 0:
-        os.environ["TFHUB_CACHE_DIR"] = path  # Any folder that you can access
+    try:
+        fin = open("path_info.txt", "r+")
+        path = fin.readline().strip()
+        if len(path) > 0:
+            os.environ["TFHUB_CACHE_DIR"] = path  # Any folder that you can access
+    except:
+        pass
+
     hub_handle = "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
     hub_module = hub.load(hub_handle)
 
