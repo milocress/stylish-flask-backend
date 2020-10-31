@@ -6,3 +6,4 @@ Pillow
 tensorflow
 tensorflow-hub
 waitress
+py-opencv
