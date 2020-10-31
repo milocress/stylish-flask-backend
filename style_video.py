@@ -3,7 +3,6 @@ import io
 import os
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -73,8 +72,14 @@ def crop_center(image):
 @functools.lru_cache(maxsize=None)
 def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
     """Loads and preprocesses images."""
-    # Load and convert to float32 numpy array, add batch dimension, and normalize to range [0, 1].
-    img = plt.imread(image_path).astype(np.float32)[np.newaxis, ...]
+    
+    # deal with possible RGBA vs RGB issues
+    png = Image.open(image_path).convert('RGBA')
+    background = Image.new('RGBA', png.size, (255,255,255))
+
+    img = Image.alpha_composite(background, png).convert('RGB')
+    img = np.array([np.asarray(img)])
+    
     if img.max() > 1.0:
         img = img / 255.0
     if len(img.shape) == 3:
