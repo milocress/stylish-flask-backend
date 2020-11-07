@@ -93,8 +93,6 @@ import tensorflow as tf
 # In[2]:
 
 
-
-
 mpl.rcParams["figure.figsize"] = (12, 12)
 mpl.rcParams["axes.grid"] = False
 

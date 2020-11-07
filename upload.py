@@ -2,6 +2,7 @@ import io
 import json
 import os
 
+import click
 import numpy as np
 import requests
 from flask import Flask, render_template, request, send_file
@@ -13,6 +14,8 @@ dirname = os.path.dirname(__file__)
 UPLOAD_FOLDER = os.path.join(dirname, "static/")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "mp4"}
 FILE_TYPE = {"jpg": "image", "jpeg": "image", "png": "image", "mp4": "video"}
+REMOTE_URL = "https://stylish-videos.herokuapp.com"
+LOCAL_URL = "http://localhost:5000"
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -38,9 +41,9 @@ def my_form_post():
     content = request.form["content url"]
     style = request.form["style url"]
 
-    api_url = "https://stylish-videos.herokuapp.com/image_urls"
+    # api_url = "https://stylish-videos.herokuapp.com/image_urls"
     data = {"content": content, "style": style}
-    r = requests.get(url=api_url, json=data)
+    r = requests.get(url=f"{app.api_url}/image_urls", json=data)
     file_object = io.BytesIO(r._content)
 
     return send_file(file_object, mimetype="image/PNG")
@@ -65,9 +68,6 @@ def image_urls():
 
     return send_file(file_object, mimetype="image/PNG")
 
-
-# ================================
-#  merged from dwu upload.py
 
 # Copied from flask documentation
 def allowed_file(filename):
@@ -108,9 +108,9 @@ def upload_file():
             print(filepath2)
             # if FILE_TYPE[extension(file.filename)] == 'video':
             #    return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
-            api_url = "https://stylish-videos.herokuapp.com/image_uploads"
+            # api_url = "https://stylish-videos.herokuapp.com/image_uploads"
             data = {"content": filepath1, "style": filepath2}
-            r = requests.get(url=api_url, json=data)
+            r = requests.get(url=f"{app.api_url}/image_uploads", json=data)
             file_object = io.BytesIO(r._content)
 
             return send_file(file_object, mimetype="image/PNG")
@@ -135,8 +135,19 @@ def image_upload():
     return send_file(file_object, mimetype="image/PNG")
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option("--local/--remote", default=True)
+def main(local):
+    if local:
+        app.api_url = LOCAL_URL
+    else:
+        app.api_url = REMOTE_URL
     app.run()
+
+
+if __name__ == "__main__":
+    main()
+
 
 def create_app():
     return app

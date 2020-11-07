@@ -74,10 +74,10 @@ def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
     """Loads and preprocesses images."""
 
     # deal with possible RGBA vs RGB issues
-    png = Image.open(image_path).convert('RGBA')
-    background = Image.new('RGBA', png.size, (255,255,255))
+    png = Image.open(image_path).convert("RGBA")
+    background = Image.new("RGBA", png.size, (255, 255, 255))
 
-    img = Image.alpha_composite(background, png).convert('RGB')
+    img = Image.alpha_composite(background, png).convert("RGB")
     img = np.array([np.asarray(img)])
 
     if img.max() > 1.0:
