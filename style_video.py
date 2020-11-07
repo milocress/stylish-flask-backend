@@ -1,6 +1,7 @@
 import functools
 import io
 import os
+import time
 
 import cv2
 import numpy as np
@@ -118,7 +119,49 @@ def get_content_image_from_path(content_image_path):
     return content_image
 
 
-def get_style_transfer(content_image, nframe, style_image, send_image=False):
+def run_style_transform(
+    style_bottleneck, preprocessed_content_image, style_transform_path
+):
+    # Load the model.
+    interpreter = tf.lite.Interpreter(model_path=style_transform_path)
+
+    # Set model input.
+    input_details = interpreter.get_input_details()
+    interpreter.allocate_tensors()
+
+    # Set model inputs.
+    interpreter.set_tensor(input_details[0]["index"], preprocessed_content_image)
+    interpreter.set_tensor(input_details[1]["index"], style_bottleneck)
+    interpreter.invoke()
+
+    # Transform content image.
+    stylized_image = interpreter.tensor(interpreter.get_output_details()[0]["index"])()
+
+    return stylized_image
+
+
+# Function to run style prediction on preprocessed style image.
+def run_style_predict(preprocessed_style_image, style_predict_path):
+    # Load the model.
+    interpreter = tf.lite.Interpreter(model_path=style_predict_path)
+
+    # Set model input.
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    interpreter.set_tensor(input_details[0]["index"], preprocessed_style_image)
+
+    # Calculate style bottleneck.
+    interpreter.invoke()
+    style_bottleneck = interpreter.tensor(
+        interpreter.get_output_details()[0]["index"]
+    )()
+
+    return style_bottleneck
+
+
+def get_style_transfer(
+    content_image, nframe, style_image, use_tflite=False, send_image=False
+):
     try:
         fin = open("path_info.txt", "r+")
         path = fin.readline().strip()
@@ -127,15 +170,40 @@ def get_style_transfer(content_image, nframe, style_image, send_image=False):
     except:
         pass
 
-    hub_handle = "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
-    hub_module = hub.load(hub_handle)
+    if use_tflite:
+        style_predict_path = tf.keras.utils.get_file(
+            "style_predict.tflite",
+            "https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite",
+        )
+        style_transform_path = tf.keras.utils.get_file(
+            "style_transform.tflite",
+            "https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite",
+        )
+        start_time = time.time()
+        style_bottleneck = run_style_predict(style_image, style_predict_path)
+        print(f"Style prediction time is {time.time() - start_time}")
 
-    outputs = hub_module(tf.constant(content_image), tf.constant(style_image))
-    stylized_image = outputs[0]
+        start_time = time.time()
+        stylized_image = run_style_transform(
+            style_bottleneck, content_image, style_transform_path
+        )
+        print(f"Style transfer time is {time.time() - start_time}")
 
-    img = tf.keras.preprocessing.image.array_to_img(
-        tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None
-    )
+        img = tf.keras.preprocessing.image.array_to_img(
+            tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None
+        )
+    else:
+        hub_handle = (
+            "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
+        )
+        hub_module = hub.load(hub_handle)
+
+        outputs = hub_module(tf.constant(content_image), tf.constant(style_image))
+        stylized_image = outputs[0]
+
+        img = tf.keras.preprocessing.image.array_to_img(
+            tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None
+        )
 
     # write PNG in file-object
     if not send_image:

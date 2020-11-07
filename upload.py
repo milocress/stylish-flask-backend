@@ -126,7 +126,9 @@ def image_upload():
     content_image = style_video.get_content_image_from_path(content_path)
     style_image = style_video.preprocesses_style_image(style_path)
 
-    img = style_video.get_style_transfer(content_image, 0, style_image, True)
+    img = style_video.get_style_transfer(
+        content_image, 0, style_image, use_tflite=app.use_tflite, send_image=True
+    )
 
     file_object = io.BytesIO()
     img.save(file_object, "PNG")
@@ -137,11 +139,14 @@ def image_upload():
 
 @click.command()
 @click.option("--local/--remote", default=True)
-def main(local):
+@click.option("--lite/--no-lite", default=False)
+def main(local, lite):
     if local:
         app.api_url = LOCAL_URL
     else:
         app.api_url = REMOTE_URL
+
+    app.use_tflite = lite
     app.run()
 
 
