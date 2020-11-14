@@ -110,12 +110,33 @@ def upload_file():
             #    return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
             # api_url = "https://stylish-videos.herokuapp.com/image_uploads"
             data = {"content": filepath1, "style": filepath2}
-            r = requests.get(url=f"{app.api_url}/image_uploads", json=data)
-            file_object = io.BytesIO(r._content)
+            content_filetype = FILE_TYPE[extension(filepath1)]
+            print(content_filetype)
+            if content_filetype == "video":
+                # r = requests.get(url=f"{app.api_url}/video_uploads", json=data)
+                return render_template("video.html", filename="output.mp4")
+            else:
+                r = requests.get(url=f"{app.api_url}/image_uploads", json=data)
+                file_object = io.BytesIO(r._content)
 
-            return send_file(file_object, mimetype="image/PNG")
+                return send_file(file_object, mimetype="image/PNG")
 
     return render_template("upload_form.html")
+
+
+@app.route("/video_uploads")
+def video_upload():
+    content_path = request.json["content"]
+    style_path = request.json["style"]
+
+    styled_video_path = style_transfer_video_file(content_path, style_path)
+
+
+    file_object = io.BytesIO()
+    img.save(file_object, "PNG")
+    file_object.seek(0)
+
+    return send_file(file_object, mimetype="image/PNG")
 
 
 @app.route("/image_uploads")

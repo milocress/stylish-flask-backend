@@ -12,12 +12,17 @@ from PIL import Image
 
 # VIDEO PROCESSING =====================================================
 def slice_frames(video_file):
-    """ video -> images """
+    """ Slices a video into its frames and saves the result in test_frames/
+    Args
+        video_file (str): path name of video to slice up
+    Output
+        Returns the number of frames in the video
+    """
     cap = cv2.VideoCapture(video_file)
 
     idx = 0
     framecount = 0
-    frame_skip = 10
+    frame_skip = 0
     while cap.isOpened():
         ret, frame = cap.read()
         if ret:
@@ -34,25 +39,27 @@ def slice_frames(video_file):
     cap.release()
     cv2.destroyAllWindows()
 
-    return idx
+    return framecount
 
 
-def combine_frames():
+def combine_frames(frame_paths, output_video_folder, output_filename):
     """images -> frames"""
-    image_folder = "output_frames"
-    video_filename = "output.mp4"
 
-    images = [img for img in os.listdir(image_folder) if img.endswith(".jpg")]
-    frame = cv2.imread(os.path.join(image_folder, images[0]))
+    frame = cv2.imread(frame_paths[0])
     height, width, layers = frame.shape
 
-    video = cv2.VideoWriter(video_filename, 0, 5, (width, height))
+    fourcc_codec = cv2.VideoWriter_fourcc(*"XVID")
+    fps = 25
+    output_path = os.path.join(output_video_folder, output_filename)
+    video = cv2.VideoWriter(output_path, fourcc_codec, fps, (width, height))
 
-    for image in images:
-        video.write(cv2.imread(os.path.join(image_folder, image)))
+    for frame_path in frame_paths:
+        frame = cv2.imread(frame_path)
+        video.write(frame)
 
     cv2.destroyAllWindows()
     video.release()
+    return output_path
 
 
 # /VIDEO PROCESSING ==========================================================
@@ -119,6 +126,7 @@ def get_content_image_from_path(content_image_path):
     return content_image
 
 
+# TF Lite Functions
 def run_style_transform(
     style_bottleneck, preprocessed_content_image, style_transform_path
 ):
@@ -162,6 +170,10 @@ def run_style_predict(preprocessed_style_image, style_predict_path):
 def get_style_transfer(
     content_image, nframe, style_image, use_tflite=False, send_image=False
 ):
+    """
+    Performs style transfer on a content image and style image. This function is intended for use when styling one single image,
+    not a video. If send_image is True, will return the pillow image object itself, otherwise will save to output_frames.
+    """
     try:
         fin = open("path_info.txt", "r+")
         path = fin.readline().strip()
@@ -207,24 +219,69 @@ def get_style_transfer(
 
     # write PNG in file-object
     if not send_image:
-        # img.save("output_frames/outputframe" + str(nframe) + ".jpg")
-        img.save("TEST.jpg")
+        img.save("output_frames/outputframe" + str(nframe) + ".jpg")
+        # img.save("TEST.jpg")
     else:
         return img
 
 
-# =========================================================
+def style_transfer_video(n_frames, style_image_path=None):
+    """
+    Video style transfer for given nubmer of frames.
+    
+    Args
+        - n_frames (int): number of frames to style from test frames
+    """
+    style_image = preprocesses_style_image(style_image_path=style_image_path)
 
-
-def style_transfer_video(n_frames):
-    style_image = preprocesses_style_image()
+    start_time = time.time()
+    hub_handle = (
+            "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
+        )
+    hub_module = hub.load(hub_handle)
+    print(f"Time to load hub module {time.time() - start_time}")
+    frame_paths = []
     for i in range(n_frames):
-        content_path = "test_frames/testframe" + str(i) + ".jpg"
+        content_path = f"test_frames/testframe{i}.jpg"
         content_image = get_content_image_from_path(content_path)
-        get_style_transfer(content_image, i, style_image)
 
+        outputs = hub_module(tf.constant(content_image), tf.constant(style_image))
+        stylized_image = outputs[0]
 
-def style_transfer_video_file(fname):
-    n_frames = slice_frames(fname)
-    style_transfer_video(n_frames)
-    combine_frames()
+        img = tf.keras.preprocessing.image.array_to_img(
+            tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None
+        )
+
+        img.save(f"output_frames/outputframe{i}.jpg")
+        frame_paths.append(f"output_frames/outputframe{i}.jpg")
+        # print(f"Frame {i} completed")
+    return frame_paths
+
+def style_transfer_video_file(content_video_path, style_image_path):
+    """
+    Video style transfer for a given content video file fname
+
+    Args
+        - content_video_path (str): filepath of content video
+        - style_image_path (str): filepath of style image
+    """
+    output_folder = "output_videos"
+    video_filename = "output.mp4"
+    start_time = time.time()
+    n_frames = slice_frames(content_video_path)
+    print(f"Time to slice up {time.time() - start_time} for {n_frames} frames")
+
+    start_time = time.time()
+    frame_paths = style_transfer_video(n_frames, style_image_path=style_image_path)
+    print(f"Time to style transfer {time.time() - start_time}")
+
+    start_time = time.time()
+    output_path = combine_frames(frame_paths, output_folder, video_filename)
+    print(f"Time to combine {time.time() - start_time}")
+
+    return output_path
+
+if __name__ == "__main__":
+    # frame_paths = [f"output_frames/outputframe{i}.jpg" for i in range(50)]
+    # combine_frames(frame_paths, "output_videos", "output.mp4")
+    style_transfer_video_file("trimmed.mp4", "static/udnie.jpg")
