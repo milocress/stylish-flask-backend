@@ -152,7 +152,5 @@ def main(local, lite):
 
 if __name__ == "__main__":
     main()
-
-
 def create_app():
     return app
