@@ -7,9 +7,15 @@ import numpy as np
 import requests
 from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
+from fast_neural_style_pytorch.stylize import stylize
+from PIL import Image
+import tensorflow as tf
+
 
 import style_video
 
+
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 dirname = os.path.dirname(__file__)
 UPLOAD_FOLDER = os.path.join(dirname, "static/")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "mp4"}
@@ -136,6 +142,17 @@ def image_upload():
 
     return send_file(file_object, mimetype="image/PNG")
 
+
+@app.route("/fast_image_uploads")
+def fast_image_upload():
+    content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
+    img = tf.keras.preprocessing.image.array_to_img(
+            stylize(content_path), data_format=None, scale=True, dtype=None
+        )
+    file_object = io.BytesIO()
+    img.save(file_object, "PNG")
+    file_object.seek(0)
+    return send_file(file_object, mimetype="image/PNG")
 
 @click.command()
 @click.option("--local/--remote", default=True)
