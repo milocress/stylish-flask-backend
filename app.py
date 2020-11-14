@@ -19,7 +19,7 @@ LOCAL_URL = "http://localhost:5000"
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
+app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
 
 @app.route("/")
 def show_index():
