@@ -73,8 +73,10 @@ def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
     img = tf.image.resize(img, image_size, preserve_aspect_ratio=True)
     return img
 
-def preprocesses_style_image(style_image_url=None):
-    if not style_image_url:
+
+def preprocess_style_image(style_image_path=None):
+    style_img_size = (256, 256)
+    if not style_image_path:
         style_image_url = "https://upload.wikimedia.org/wikipedia/commons/0/0a/The_Great_Wave_off_Kanagawa.jpg"
         style_image_path = tf.keras.utils.get_file(os.path.basename(style_image_url)[-128:], style_image_url)
 
@@ -107,10 +109,56 @@ def get_style_transfer(content_image_path, nframe, style_image):
     img.save("output_frames/outputframe" + str(nframe) + ".jpg")
 
 def style_transfer_video(n_frames):
-    style_image = preprocesses_style_image()
+    style_image = preprocess_style_image()
     for i in range(n_frames):
-        content_url = "test_frames/testframe" + str(i) + ".jpg"
-        get_style_transfer(content_url, i, style_image)
+        content_path = "test_frames/testframe" + str(i) + ".jpg"
+        content_image = get_content_image_from_path(content_path)
+        get_style_transfer(content_image, i, style_image)
+
+def style_transfer_skip(n_frames, n_skip):
+    style_image = preprocess_style_image()
+    transfer_indices = list(range(0, n_frames, n_skip))
+    if transfer_indices[-1] != n_frames - 1:
+        transfer_indices.append(n_frames - 1)
+    all_indices = range(n_frames)
+    transferred_imgs = {}
+    ia = tf.keras.preprocessing.image.img_to_array
+    ai = tf.keras.preprocessing.image.array_to_img
+    for i in transfer_indices:
+        content_path = "test_frames/testframe" + str(i) + ".jpg"
+        content_image = get_content_image_from_path(content_path)
+        img = get_style_transfer(content_image, i, style_image, send_image=True)
+        transferred_imgs[i] = ia(img)
+
+    deltas = {}
+    for i, j in zip(all_indices, all_indices[1:]):
+        content_path_i = "test_frames/testframe" + str(i) + ".jpg"
+        content_path_j = "test_frames/testframe" + str(j) + ".jpg"
+        img_i = get_content_image_from_path(content_path_i)
+        img_j = get_content_image_from_path(content_path_j)
+        deltas[i] = (ia(img_j) - ia(img_i))
+
+    transfer_deltas = {}
+    for i, j in zip(transfer_indices, transfer_indices[1:]):
+        transfer_deltas[(i, j)] = transferred_imgs[j] - transferred_imgs[i]
+
+    def get_deltas(large_delta):
+        a, b = large_delta
+        return zip(range(a, b), range(a + 1, b))
+
+    most_recent_transfer_index = 0
+    current_img = transferred_imgs[0]
+    for i in all_indices:
+        if i in transfer_indices:
+            most_recent_transfer_index = i
+            current_img = transferred_imgs[i]
+        else:
+            current_img = ai(ia(current_img) + deltas[i])
+
+        current_img.save("output_frames/outputframe" + str(i) + ".jpg")
+
+
+
 
 def style_transfer_video_file(fname):
     n_frames = slice_frames(fname)
