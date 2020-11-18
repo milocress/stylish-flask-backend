@@ -148,7 +148,6 @@ def fast_upload_file():
     if request.method == "POST":
         # check if the post request has the file part
         if "file1" not in request.files:
-            print(request.files, flush=True)
             flash("No file part")
             return redirect(request.url)
         file1 = request.files["file1"]
@@ -169,6 +168,7 @@ def fast_upload_file():
             #    return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
             # api_url = "https://stylish-videos.herokuapp.com/image_uploads"
             data = {"content": filepath1}
+            # print(filepath1, flush=True)
             r = requests.get(url=f"{app.api_url}/fast_image_uploads", json=data)
             file_object = io.BytesIO(r._content)
 
@@ -178,7 +178,9 @@ def fast_upload_file():
 
 
 @app.route("/fast_image_uploads")
-def fast_image_upload(content_path=None):
+def fast_image_upload():
+    content_path = request.json["content"]
+    print(content_path, flush=True)
     if content_path==None:
         content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
     img = tf.keras.preprocessing.image.array_to_img(
