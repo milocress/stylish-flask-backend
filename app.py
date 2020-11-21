@@ -113,8 +113,9 @@ def upload_file():
             content_filetype = FILE_TYPE[extension(filepath1)]
             print(content_filetype)
             if content_filetype == "video":
+                print("HEEEEEE")
                 # r = requests.get(url=f"{app.api_url}/video_uploads", json=data)
-                return render_template("video.html", filename="output.mp4")
+                return render_template("video.html")
             else:
                 r = requests.get(url=f"{app.api_url}/image_uploads", json=data)
                 file_object = io.BytesIO(r._content)
