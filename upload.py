@@ -5,17 +5,15 @@ import os
 import click
 import numpy as np
 import requests
-from flask import Flask, render_template, request, send_file
-from werkzeug.utils import secure_filename
-from fast_neural_style_pytorch.stylize import stylize
-from PIL import Image
 import tensorflow as tf
-
+from flask import Flask, render_template, request, send_file
+from PIL import Image
+from werkzeug.utils import secure_filename
 
 import style_video
+from fast_neural_style_pytorch.stylize import stylize
 
-
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
+os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 dirname = os.path.dirname(__file__)
 UPLOAD_FOLDER = os.path.join(dirname, "static/")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "mp4"}
@@ -156,10 +154,7 @@ def fast_upload_file():
         if file1.filename == "":
             flash("No selected file")
             return redirect(request.url)
-        if (
-            file1
-            and allowed_file(file1.filename)
-        ):
+        if file1 and allowed_file(file1.filename):
             filename1 = secure_filename(file1.filename)
             filepath1 = os.path.join(app.config["UPLOAD_FOLDER"], filename1)
             file1.save(filepath1)
@@ -181,15 +176,16 @@ def fast_upload_file():
 def fast_image_upload():
     content_path = request.json["content"]
     print(content_path, flush=True)
-    if content_path==None:
+    if content_path == None:
         content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
     img = tf.keras.preprocessing.image.array_to_img(
-            stylize(content_path), data_format=None, scale=True, dtype=None
-        )
+        stylize(content_path), data_format=None, scale=True, dtype=None
+    )
     file_object = io.BytesIO()
     img.save(file_object, "PNG")
     file_object.seek(0)
     return send_file(file_object, mimetype="image/PNG")
+
 
 @click.command()
 @click.option("--local/--remote", default=True)
