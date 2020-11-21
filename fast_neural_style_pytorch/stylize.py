@@ -10,13 +10,13 @@ import cv2
 STYLE_TRANSFORM_PATH = "fast_neural_style_pytorch/transforms/udnie.pth"
 PRESERVE_COLOR = False
 
-def stylize(content_image_path=None):
+def stylize(content_image_path=None, style_path = "fast_neural_style_pytorch/transforms/starry.pth"):
     # Device
     device = ("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load Transformer Network
     net = transformer.TransformerNetwork()
-    net.load_state_dict(torch.load(STYLE_TRANSFORM_PATH, map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load(style_path, map_location=torch.device('cpu')))
     net = net.to(device)
 
     with torch.no_grad():
