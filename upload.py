@@ -112,8 +112,8 @@ def upload_file():
             filepath2 = os.path.join(app.config["UPLOAD_FOLDER"], filename2)
             file2.save(filepath2)
             print(filepath2)
-            # if FILE_TYPE[extension(file.filename)] == 'video':
-            #    return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
+            # if FILE_TYPE[extension(file2.filename)] == 'video':
+            #    return render_template("video.html", filename = filename2, filetype = FILE_TYPE[extension(filename2)])
             # api_url = "https://stylish-videos.herokuapp.com/image_uploads"
             data = {"content": filepath1, "style": filepath2}
             r = requests.get(url=f"{app.api_url}/image_uploads", json=data)
