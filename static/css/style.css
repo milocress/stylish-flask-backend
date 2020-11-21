@@ -61,18 +61,22 @@
     border-radius: 20px;
 } */
 
-.inputstyle {
-    margin: 50px;
+.inputstyle 
+{
+    position: relative;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    color: #ffffff;
     width: 150px;
-    padding: 5px 35px 5px 5px;
-    font-size: 16px;
-    border: 1px solid #CCC;
-    height: 34px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background: url(https://stackoverflow.com/favicon.ico) 96% / 15% no-repeat #EEE;
-  }
+    height: 40px;
+
+    background-color: #37327a;
+    border-radius: 5px;  
+    padding: 5px 15px; 
+    text-align: center;
+    display:block;
+    cursor: pointer;
+    margin-right:auto; margin-left:auto; 
+}
 
 .field 
 {
