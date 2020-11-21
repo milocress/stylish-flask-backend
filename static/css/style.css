@@ -53,6 +53,27 @@
     border-radius: 5px;  
 }
 
+/* .inputstyle
+{
+    width: 190px;
+    display: flex;
+    text-align: middle;
+    border-radius: 20px;
+} */
+
+.inputstyle {
+    margin: 50px;
+    width: 150px;
+    padding: 5px 35px 5px 5px;
+    font-size: 16px;
+    border: 1px solid #CCC;
+    height: 34px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: url(https://stackoverflow.com/favicon.ico) 96% / 15% no-repeat #EEE;
+  }
+
 .field 
 {
     text-align: center;
@@ -63,3 +84,4 @@
     height: 30px;
     border-radius: 5px;  
 }
+
