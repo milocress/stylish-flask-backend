@@ -172,6 +172,7 @@ def fast_upload_file():
             flash("No file part")
             return redirect(request.url)
         file1 = request.files["file1"]
+        stylepath = request.form['style']
         # if user does not select file, browser also
         # submit an empty part without filename
         if file1.filename == "":
@@ -188,7 +189,7 @@ def fast_upload_file():
             # if FILE_TYPE[extension(file.filename)] == 'video':
             #    return render_template("video.html", filename = filename, filetype = FILE_TYPE[extension(filename)])
             # api_url = "https://stylish-videos.herokuapp.com/image_uploads"
-            data = {"content": filepath1}
+            data = {"content": filepath1, "style": stylepath}
             # print(filepath1, flush=True)
             r = requests.get(url=f"{app.api_url}/fast_image_uploads", json=data)
             file_object = io.BytesIO(r._content)
@@ -204,8 +205,9 @@ def fast_image_upload():
     print(content_path, flush=True)
     if content_path==None:
         content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
+    style_path = request.json["style"]
     img = tf.keras.preprocessing.image.array_to_img(
-            stylize(content_path), data_format=None, scale=True, dtype=None
+            stylize(content_path, style_path), data_format=None, scale=True, dtype=None
         )
     file_object = io.BytesIO()
     img.save(file_object, "PNG")
@@ -222,7 +224,7 @@ def main(local, lite):
         app.api_url = REMOTE_URL
 
     app.use_tflite = lite
-    app.run()
+    app.run(debug=True)
 
 
 if __name__ == "__main__":
