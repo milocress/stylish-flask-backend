@@ -46,30 +46,9 @@ def my_form_post():
     content = request.form["content url"]
     style = request.form["style url"]
 
-    # api_url = "https://stylish-videos.herokuapp.com/image_urls"
     data = {"content": content, "style": style}
     r = requests.get(url=f"{app.api_url}/image_urls", json=data)
     file_object = io.BytesIO(r._content)
-
-    return send_file(file_object, mimetype="image/PNG")
-
-
-@app.route("/image_urls")
-def image_urls():
-    content_image_url = request.json["content"]  # if key doesn't exist, returns None
-    style_image_url = request.json["style"]
-
-    content_image_path = style_video.get_image_path_from_url(content_image_url)
-    style_image_path = style_video.get_image_path_from_url(style_image_url)
-
-    content_image = style_video.get_content_image_from_path(content_image_path)
-    style_image = style_video.preprocesses_style_image(style_image_path)
-
-    img = style_video.get_style_transfer(content_image, 0, style_image, True)
-
-    file_object = io.BytesIO()
-    img.save(file_object, "PNG")
-    file_object.seek(0)
 
     return send_file(file_object, mimetype="image/PNG")
 
