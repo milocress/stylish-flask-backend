@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore outputs
+output_frames/
+
 # mac stuff
 .DS_STORE
 
