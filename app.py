@@ -11,7 +11,7 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 
 import style_video
-from fast_neural_style_pytorch.stylize import stylize, stylize_folder
+from fast_neural_style_pytorch.stylize import stylize
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 dirname = os.path.dirname(__file__)
@@ -161,7 +161,7 @@ def fast_upload_file():
             content_filetype = FILE_TYPE[extension(file1.filename)]
 
             if content_filetype == "video":
-                r = requests.get(url=f"{app.api_url}/video_uploads", json=data)
+                r = requests.get(url=f"{app.api_url}/fast_video_uploads", json=data)
                 return render_template(
                     "video.html",
                     filename=r._content.decode("ascii"),
@@ -199,11 +199,14 @@ def fast_video_upload():
     if content_path == None:
         content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
     style_path = request.json["style"]
-
-    start_time = time.time()
-    stylize_folder(style_path, frame_save_path, style_frame_save_path, batch_size=batch_size, prune_level=None)
-    print("Transfer time: {}".format(time.time() - start_time))
-    return ""
+    # TODO: add code to slice up content into frames
+    content_frame_save_path = "test_frames"
+    style_frame_save_path = "output_frames"
+    styled_video_path = style_video.fast_style_transfer_video_file(
+        content_path,
+        style_path,
+    )
+    return styled_video_path
 
 
 @click.command()
