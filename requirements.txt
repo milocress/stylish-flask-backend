@@ -1,8 +1,13 @@
 Flask
+click
 Keras
-numpy
+numpy==1.17.3
+h5py==2.10.0
+matplotlib
 Pillow
 tensorflow
 tensorflow-hub
 waitress
-opencv-python-headless
+opencv-python-headless==4.1.2.30
+torch==1.5.0+cpu
+torchvision==0.6.0+cpu
