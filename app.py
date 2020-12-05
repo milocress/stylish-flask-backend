@@ -225,7 +225,7 @@ def main(local, lite):
         app.api_url = REMOTE_URL
 
     app.use_tflite = lite
-    app.run(debug=True)
+    app.run(debug=False) # change to False for actual deployment
 
 
 if __name__ == "__main__":
