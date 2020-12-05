@@ -53,6 +53,31 @@
     border-radius: 5px;  
 }
 
+/* .inputstyle
+{
+    width: 190px;
+    display: flex;
+    text-align: middle;
+    border-radius: 20px;
+} */
+
+.inputstyle 
+{
+    position: relative;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    color: #ffffff;
+    width: 150px;
+    height: 40px;
+
+    background-color: #37327a;
+    border-radius: 5px;  
+    padding: 5px 15px; 
+    text-align: center;
+    display:block;
+    cursor: pointer;
+    margin-right:auto; margin-left:auto; 
+}
+
 .field 
 {
     text-align: center;
@@ -63,3 +88,4 @@
     height: 30px;
     border-radius: 5px;  
 }
+

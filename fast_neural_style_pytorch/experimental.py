@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class TransformerNetworkV2(nn.Module):
     """
     Feedforward Transformation NetworkV2
@@ -8,6 +9,7 @@ class TransformerNetworkV2(nn.Module):
         - No Tanh
         + Using Fully Pre-activated Residual Layers 
     """
+
     def __init__(self):
         super(TransformerNetworkV2, self).__init__()
         self.ConvBlock = nn.Sequential(
@@ -16,21 +18,21 @@ class TransformerNetworkV2(nn.Module):
             ConvLayer(32, 64, 3, 2),
             nn.ReLU(),
             ConvLayer(64, 128, 3, 2),
-            nn.ReLU()
+            nn.ReLU(),
         )
         self.ResidualBlock = nn.Sequential(
             ResidualLayerV2(128, 3),
             ResidualLayerV2(128, 3),
             ResidualLayerV2(128, 3),
             ResidualLayerV2(128, 3),
-            ResidualLayerV2(128, 3)
+            ResidualLayerV2(128, 3),
         )
         self.DeconvBlock = nn.Sequential(
             DeconvLayer(128, 64, 3, 2, 1),
             nn.ReLU(),
             DeconvLayer(64, 32, 3, 2, 1),
             nn.ReLU(),
-            ConvLayer(32, 3, 9, 1, norm="None")
+            ConvLayer(32, 3, 9, 1, norm="None"),
         )
 
     def forward(self, x):
@@ -38,6 +40,7 @@ class TransformerNetworkV2(nn.Module):
         x = self.ResidualBlock(x)
         out = self.DeconvBlock(x)
         return out
+
 
 class TransformerResNextNetwork(nn.Module):
     """
@@ -46,6 +49,7 @@ class TransformerResNextNetwork(nn.Module):
         - No Tanh
         + ResNeXt Layer
     """
+
     def __init__(self):
         super(TransformerResNextNetwork, self).__init__()
         self.ConvBlock = nn.Sequential(
@@ -54,21 +58,21 @@ class TransformerResNextNetwork(nn.Module):
             ConvLayer(32, 64, 3, 2),
             nn.ReLU(),
             ConvLayer(64, 128, 3, 2),
-            nn.ReLU()
+            nn.ReLU(),
         )
         self.ResidualBlock = nn.Sequential(
             ResNextLayer(128, [64, 64, 128], kernel_size=3),
             ResNextLayer(128, [64, 64, 128], kernel_size=3),
             ResNextLayer(128, [64, 64, 128], kernel_size=3),
             ResNextLayer(128, [64, 64, 128], kernel_size=3),
-            ResNextLayer(128, [64, 64, 128], kernel_size=3)
+            ResNextLayer(128, [64, 64, 128], kernel_size=3),
         )
         self.DeconvBlock = nn.Sequential(
             DeconvLayer(128, 64, 3, 2, 1),
             nn.ReLU(),
             DeconvLayer(64, 32, 3, 2, 1),
             nn.ReLU(),
-            ConvLayer(32, 3, 9, 1, norm="None")
+            ConvLayer(32, 3, 9, 1, norm="None"),
         )
 
     def forward(self, x):
@@ -76,6 +80,7 @@ class TransformerResNextNetwork(nn.Module):
         x = self.ResidualBlock(x)
         out = self.DeconvBlock(x)
         return out
+
 
 class TransformerResNextNetwork_Pruned(nn.Module):
     """
@@ -86,28 +91,35 @@ class TransformerResNextNetwork_Pruned(nn.Module):
         + Pruned
         Reference: https://heartbeat.fritz.ai/creating-a-17kb-style-transfer-model-with-layer-pruning-and-quantization-864d7cc53693 
     """
+
     def __init__(self, alpha=1.0):
         super(TransformerResNextNetwork_Pruned, self).__init__()
         a = alpha
         self.ConvBlock = nn.Sequential(
-            ConvLayer(3, int(a*32), 9, 1),
+            ConvLayer(3, int(a * 32), 9, 1),
             nn.ReLU(),
-            ConvLayer(int(a*32), int(a*32), 3, 2),
+            ConvLayer(int(a * 32), int(a * 32), 3, 2),
             nn.ReLU(),
-            ConvLayer(int(a*32), int(a*32), 3, 2),
-            nn.ReLU()
+            ConvLayer(int(a * 32), int(a * 32), 3, 2),
+            nn.ReLU(),
         )
         self.ResidualBlock = nn.Sequential(
-            ResNextLayer(int(a*32), [int(a*16), int(a*16), int(a*32)], kernel_size=3),
-            ResNextLayer(int(a*32), [int(a*16), int(a*16), int(a*32)], kernel_size=3),
-            ResNextLayer(int(a*32), [int(a*16), int(a*16), int(a*32)], kernel_size=3),
+            ResNextLayer(
+                int(a * 32), [int(a * 16), int(a * 16), int(a * 32)], kernel_size=3
+            ),
+            ResNextLayer(
+                int(a * 32), [int(a * 16), int(a * 16), int(a * 32)], kernel_size=3
+            ),
+            ResNextLayer(
+                int(a * 32), [int(a * 16), int(a * 16), int(a * 32)], kernel_size=3
+            ),
         )
         self.DeconvBlock = nn.Sequential(
-            DeconvLayer(int(a*32), int(a*32), 3, 2, 1),
+            DeconvLayer(int(a * 32), int(a * 32), 3, 2, 1),
             nn.ReLU(),
-            DeconvLayer(int(a*32), int(a*32), 3, 2, 1),
+            DeconvLayer(int(a * 32), int(a * 32), 3, 2, 1),
             nn.ReLU(),
-            ConvLayer(int(a*32), 3, 9, 1, norm="None")
+            ConvLayer(int(a * 32), 3, 9, 1, norm="None"),
         )
 
     def forward(self, x):
@@ -116,10 +128,12 @@ class TransformerResNextNetwork_Pruned(nn.Module):
         out = self.DeconvBlock(x)
         return out
 
+
 class TransformerNetworkDenseNet(nn.Module):
     """
     Feedforward Transformer Network using DenseNet Block instead of Residual Block
     """
+
     def __init__(self):
         super(TransformerNetworkDenseNet, self).__init__()
         self.ConvBlock = nn.Sequential(
@@ -128,21 +142,21 @@ class TransformerNetworkDenseNet(nn.Module):
             ConvLayerNB(32, 64, 3, 2),
             nn.ReLU(),
             ConvLayerNB(64, 128, 3, 2),
-            nn.ReLU()
+            nn.ReLU(),
         )
         self.DenseBlock = nn.Sequential(
             NormReluConv(128, 64, 1, 1),
             DenseLayerBottleNeck(64, 16),
             DenseLayerBottleNeck(80, 16),
             DenseLayerBottleNeck(96, 16),
-            DenseLayerBottleNeck(112, 16)
+            DenseLayerBottleNeck(112, 16),
         )
         self.DeconvBlock = nn.Sequential(
             DeconvLayer(128, 64, 3, 2, 1),
             nn.ReLU(),
             DeconvLayer(64, 32, 3, 2, 1),
             nn.ReLU(),
-            ConvLayer(32, 3, 9, 1, norm="None")
+            ConvLayer(32, 3, 9, 1, norm="None"),
         )
 
     def forward(self, x):
@@ -151,10 +165,12 @@ class TransformerNetworkDenseNet(nn.Module):
         out = self.DeconvBlock(x)
         return out
 
+
 class TransformerNetworkUNetDenseNetResNet(nn.Module):
     """
     Feedforward Transformer Network using DenseNet Block instead of Residual Block
     """
+
     def __init__(self):
         super(TransformerNetworkUNetDenseNetResNet, self).__init__()
         self.C1 = ConvLayerNB(3, 32, 9, 1)
@@ -168,7 +184,7 @@ class TransformerNetworkUNetDenseNetResNet(nn.Module):
             DenseLayerBottleNeck(64, 16),
             DenseLayerBottleNeck(80, 16),
             DenseLayerBottleNeck(96, 16),
-            DenseLayerBottleNeck(112, 16)
+            DenseLayerBottleNeck(112, 16),
         )
         self.RD0 = nn.ReLU()
         self.D1 = UpsampleConvLayer(128, 64, 3, 1, 2)
@@ -185,35 +201,36 @@ class TransformerNetworkUNetDenseNetResNet(nn.Module):
         i2 = x
         x = self.RC3(self.C3(x))
         i3 = x
-        
+
         # Dense Block
         x = self.DenseBlock(x)
-        if (x.shape != i3.shape):
+        if x.shape != i3.shape:
             sh = i3.shape
-            x = x[:sh[0], :sh[1], :sh[2], :sh[3]] + i3
+            x = x[: sh[0], : sh[1], : sh[2], : sh[3]] + i3
         else:
             x = x + i3
         x = self.RD0(x)
 
         # Encoder
         x = self.D1(x)
-        if (x.shape != i2.shape):
+        if x.shape != i2.shape:
             sh = i2.shape
-            x = x[:sh[0], :sh[1], :sh[2], :sh[3]] + i2
+            x = x[: sh[0], : sh[1], : sh[2], : sh[3]] + i2
         else:
             x = x + i2
 
         x = self.RD1(x)
         x = self.D2(x)
-        if (x.shape != i1.shape):
+        if x.shape != i1.shape:
             sh = i1.shape
-            x = x[:sh[0], :sh[1], :sh[2], :sh[3]] + i1
+            x = x[: sh[0], : sh[1], : sh[2], : sh[3]] + i1
         else:
             x = x + i1
         x = self.RD2(x)
         x = self.D3(x)
-        
+
         return x
+
 
 class DenseLayerBottleNeck(nn.Module):
     """
@@ -221,16 +238,18 @@ class DenseLayerBottleNeck(nn.Module):
 
     out_channels = Growth Rate
     """
+
     def __init__(self, in_channels, out_channels):
         super(DenseLayerBottleNeck, self).__init__()
 
-        self.conv1 = NormLReluConv(in_channels, 4*out_channels, 1, 1)
-        self.conv3 = NormLReluConv(4*out_channels, out_channels, 3, 1)
+        self.conv1 = NormLReluConv(in_channels, 4 * out_channels, 1, 1)
+        self.conv3 = NormLReluConv(4 * out_channels, out_channels, 3, 1)
 
     def forward(self, x):
         out = self.conv3(self.conv1(x))
         out = torch.cat((x, out), 1)
         return out
+
 
 class ConvLayerNB(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
@@ -240,23 +259,26 @@ class ConvLayerNB(nn.Module):
         self.reflection_pad = nn.ReflectionPad2d(padding_size)
 
         # Convolution Layer
-        self.conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, bias=False)
+        self.conv_layer = nn.Conv2d(
+            in_channels, out_channels, kernel_size, stride, bias=False
+        )
 
         # Normalization Layers
         self.norm_type = norm
-        if (norm=="instance"):
+        if norm == "instance":
             self.norm_layer = nn.InstanceNorm2d(out_channels, affine=True)
-        elif (norm=="batch"):
+        elif norm == "batch":
             self.norm_layer = nn.BatchNorm2d(out_channels, affine=True)
 
     def forward(self, x):
         x = self.reflection_pad(x)
         x = self.conv_layer(x)
-        if (self.norm_type=="None"):
+        if self.norm_type == "None":
             out = x
         else:
             out = self.norm_layer(x)
         return out
+
 
 class ResidualLayerV2(nn.Module):
     """
@@ -266,6 +288,7 @@ class ResidualLayerV2(nn.Module):
 
     https://arxiv.org/abs/1603.05027
     """
+
     def __init__(self, channels=128, kernel_size=3):
         super(ResidualLayerV2, self).__init__()
         self.conv1 = NormReluConv(channels, channels, kernel_size, stride=1)
@@ -278,6 +301,7 @@ class ResidualLayerV2(nn.Module):
         out = out + identity
         return out
 
+
 class ResNextLayer(nn.Module):
     """
     Aggregated Residual Transformations for Deep Neural Networks
@@ -286,6 +310,7 @@ class ResNextLayer(nn.Module):
 
     https://arxiv.org/abs/1611.05431
     """
+
     def __init__(self, in_ch=128, channels=[64, 64, 128], kernel_size=3):
         super(ResNextLayer, self).__init__()
         ch1, ch2, ch3 = channels
@@ -303,14 +328,15 @@ class ResNextLayer(nn.Module):
         out = out + identity
         return out
 
+
 class NormReluConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
         super(NormReluConv, self).__init__()
 
         # Normalization Layers
-        if (norm=="instance"):
+        if norm == "instance":
             self.norm_layer = nn.InstanceNorm2d(in_channels, affine=True)
-        elif (norm=="batch"):
+        elif norm == "batch":
             self.norm_layer = nn.BatchNorm2d(in_channels, affine=True)
 
         # ReLU Layer
@@ -330,14 +356,15 @@ class NormReluConv(nn.Module):
         x = self.conv_layer(x)
         return x
 
+
 class NormLReluConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
         super(NormLReluConv, self).__init__()
 
         # Normalization Layers
-        if (norm=="instance"):
+        if norm == "instance":
             self.norm_layer = nn.InstanceNorm2d(in_channels, affine=True)
-        elif (norm=="batch"):
+        elif norm == "batch":
             self.norm_layer = nn.BatchNorm2d(in_channels, affine=True)
 
         # ReLU Layer
@@ -348,7 +375,9 @@ class NormLReluConv(nn.Module):
         self.reflection_pad = nn.ReflectionPad2d(padding_size)
 
         # Convolution Layer
-        self.conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, bias=False)
+        self.conv_layer = nn.Conv2d(
+            in_channels, out_channels, kernel_size, stride, bias=False
+        )
 
     def forward(self, x):
         x = self.norm_layer(x)
@@ -356,6 +385,7 @@ class NormLReluConv(nn.Module):
         x = self.reflection_pad(x)
         x = self.conv_layer(x)
         return x
+
 
 class ConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
@@ -369,19 +399,20 @@ class ConvLayer(nn.Module):
 
         # Normalization Layers
         self.norm_type = norm
-        if (norm=="instance"):
+        if norm == "instance":
             self.norm_layer = nn.InstanceNorm2d(out_channels, affine=True)
-        elif (norm=="batch"):
+        elif norm == "batch":
             self.norm_layer = nn.BatchNorm2d(out_channels, affine=True)
 
     def forward(self, x):
         x = self.reflection_pad(x)
         x = self.conv_layer(x)
-        if (self.norm_type=="None"):
+        if self.norm_type == "None":
             out = x
         else:
             out = self.norm_layer(x)
         return out
+
 
 class UpsampleConvLayer(torch.nn.Module):
     """UpsampleConvLayer
@@ -400,29 +431,42 @@ class UpsampleConvLayer(torch.nn.Module):
     def forward(self, x):
         x_in = x
         if self.upsample:
-            x_in = torch.nn.functional.interpolate(x_in, mode='nearest', scale_factor=self.upsample)
+            x_in = torch.nn.functional.interpolate(
+                x_in, mode="nearest", scale_factor=self.upsample
+            )
         out = self.reflection_pad(x_in)
         out = self.conv2d(out)
         return out
 
+
 class DeconvLayer(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, output_padding, norm="instance"):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride,
+        output_padding,
+        norm="instance",
+    ):
         super(DeconvLayer, self).__init__()
 
-        # Transposed Convolution 
+        # Transposed Convolution
         padding_size = kernel_size // 2
-        self.conv_transpose = nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding_size, output_padding)
+        self.conv_transpose = nn.ConvTranspose2d(
+            in_channels, out_channels, kernel_size, stride, padding_size, output_padding
+        )
 
         # Normalization Layers
         self.norm_type = norm
-        if (norm=="instance"):
+        if norm == "instance":
             self.norm_layer = nn.InstanceNorm2d(out_channels, affine=True)
-        elif (norm=="batch"):
+        elif norm == "batch":
             self.norm_layer = nn.BatchNorm2d(out_channels, affine=True)
 
     def forward(self, x):
         x = self.conv_transpose(x)
-        if (self.norm_type=="None"):
+        if self.norm_type == "None":
             out = x
         else:
             out = self.norm_layer(x)

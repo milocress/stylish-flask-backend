@@ -48,7 +48,7 @@ def combine_frames(frame_paths, output_video_folder, output_filename):
     frame = cv2.imread(frame_paths[0])
     height, width, layers = frame.shape
 
-    fourcc_codec = cv2.VideoWriter_fourcc(*"XVID")
+    fourcc_codec = cv2.VideoWriter_fourcc(*"avc1")
     fps = 25
     output_path = os.path.join(output_video_folder, output_filename)
     video = cv2.VideoWriter(output_path, fourcc_codec, fps, (width, height))
@@ -225,9 +225,66 @@ def get_style_transfer(
         return img
 
 
+def style_transfer_video_lite(n_frames, style_image_path=None):
+    """
+    Video style transfer for given number of frames using tf.lite version of the model.
+    
+    Args
+        - n_frames (int): number of frames to style from test frames
+    """
+    style_predict_path = tf.keras.utils.get_file(
+        "style_predict.tflite",
+        "https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite",
+    )
+    style_transform_path = tf.keras.utils.get_file(
+        "style_transform.tflite",
+        "https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite",
+    )
+    start_time = time.time()
+    style_image = preprocesses_style_image(style_image_path=style_image_path)
+    style_bottleneck = run_style_predict(style_image, style_predict_path)
+    print(f"Style prediction time is {time.time() - start_time}")
+    print(style_bottleneck)
+
+    frame_paths = []
+    for i in range(n_frames):
+        content_path = f"test_frames/testframe{i}.jpg"
+        content_image = tf.convert_to_tensor(
+            get_content_image_from_path(content_path), np.float32
+        )
+        print(f"on iteration {i}")
+        interpreter = tf.lite.Interpreter(model_path=style_transform_path)
+
+        # Set model input.
+        input_details = interpreter.get_input_details()
+        interpreter.allocate_tensors()
+        # print(input_details)
+        start_time = time.time()
+        # Set model inputs.
+        interpreter.set_tensor(input_details[0]["index"], content_image)
+        interpreter.set_tensor(input_details[1]["index"], style_bottleneck)
+        interpreter.invoke()
+
+        # Transform content image.
+        stylized_image = interpreter.tensor(
+            interpreter.get_output_details()[0]["index"]
+        )()
+        print(f"Transfer time for frame {i} is {time.time() - start_time}")
+        interpreter.reset_all_variables()
+
+        img = tf.keras.preprocessing.image.array_to_img(
+            tf.squeeze(stylized_image).numpy(), data_format=None, scale=True, dtype=None
+        )
+
+        img.save(f"output_frames/outputframe{i}.jpg")
+        frame_paths.append(f"output_frames/outputframe{i}.jpg")
+        # print(f"Frame {i} completed")
+    return frame_paths
+
+
 def style_transfer_video(n_frames, style_image_path=None):
     """
-    Video style transfer for given nubmer of frames.
+    Video style transfer for given number of frames using magenta model
     
     Args
         - n_frames (int): number of frames to style from test frames
@@ -235,9 +292,7 @@ def style_transfer_video(n_frames, style_image_path=None):
     style_image = preprocesses_style_image(style_image_path=style_image_path)
 
     start_time = time.time()
-    hub_handle = (
-            "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
-        )
+    hub_handle = "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
     hub_module = hub.load(hub_handle)
     print(f"Time to load hub module {time.time() - start_time}")
     frame_paths = []
@@ -257,7 +312,8 @@ def style_transfer_video(n_frames, style_image_path=None):
         # print(f"Frame {i} completed")
     return frame_paths
 
-def style_transfer_video_file(content_video_path, style_image_path):
+
+def style_transfer_video_file(content_video_path, style_image_path, use_tflite):
     """
     Video style transfer for a given content video file fname
 
@@ -272,16 +328,23 @@ def style_transfer_video_file(content_video_path, style_image_path):
     print(f"Time to slice up {time.time() - start_time} for {n_frames} frames")
 
     start_time = time.time()
-    frame_paths = style_transfer_video(n_frames, style_image_path=style_image_path)
+    if use_tflite:
+        frame_paths = style_transfer_video_lite(
+            n_frames, style_image_path=style_image_path
+        )
+    else:
+        frame_paths = style_transfer_video(n_frames, style_image_path=style_image_path)
     print(f"Time to style transfer {time.time() - start_time}")
 
     start_time = time.time()
     output_path = combine_frames(frame_paths, output_folder, video_filename)
     print(f"Time to combine {time.time() - start_time}")
 
-    return output_path
+    return video_filename
+
 
 if __name__ == "__main__":
     # frame_paths = [f"output_frames/outputframe{i}.jpg" for i in range(50)]
     # combine_frames(frame_paths, "output_videos", "output.mp4")
-    style_transfer_video_file("trimmed.mp4", "static/udnie.jpg")
+    style_transfer_video_lite(48, style_image_path="static/udnie.jpg")
+    # style_transfer_video_file("trimmed.mp4", "static/udnie.jpg")
