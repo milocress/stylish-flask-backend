@@ -129,8 +129,8 @@ def stylize_folder(
     image_loader = torch.utils.data.DataLoader(image_dataset, batch_size=batch_size)
 
     # Load Transformer Network
-    # net = transformer.TransformerNetwork()
-    net = experimental.TransformerResNextNetwork_Pruned(alpha=prune_level)
+    net = transformer.TransformerNetwork()
+    # net = experimental.TransformerResNextNetwork_Pruned(alpha=prune_level)
     print(f"style path is {style_path}")
     net.load_state_dict(torch.load(style_path, map_location=torch.device("cpu")))
     net = net.to(device)

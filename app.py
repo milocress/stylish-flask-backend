@@ -11,7 +11,7 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 
 import style_video
-from fast_neural_style_pytorch.stylize import stylize
+from fast_neural_style_pytorch.stylize import stylize, stylize_folder
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 dirname = os.path.dirname(__file__)
@@ -157,12 +157,21 @@ def fast_upload_file():
             filepath1 = os.path.join(app.config["UPLOAD_FOLDER"], filename1)
             file1.save(filepath1)
             print(filepath1)
-            data = {"content": filepath1, "style": stylepath}
-            # print(filepath1, flush=True)
-            r = requests.get(url=f"{app.api_url}/fast_image_uploads", json=data)
-            file_object = io.BytesIO(r._content)
+            data = {"content": filepath1, "style": stylepath, "lite": app.use_tflite}
+            content_filetype = FILE_TYPE[extension(file1.filename)]
 
-            return send_file(file_object, mimetype="image/PNG")
+            if content_filetype == "video":
+                r = requests.get(url=f"{app.api_url}/video_uploads", json=data)
+                return render_template(
+                    "video.html",
+                    filename=r._content.decode("ascii"),
+                    filetype=content_filetype,
+                )
+            else:
+                r = requests.get(url=f"{app.api_url}/fast_image_uploads", json=data)
+                file_object = io.BytesIO(r._content)
+
+                return send_file(file_object, mimetype="image/PNG")
 
     return render_template("fast_form.html")
 
@@ -181,6 +190,20 @@ def fast_image_upload():
     img.save(file_object, "PNG")
     file_object.seek(0)
     return send_file(file_object, mimetype="image/PNG")
+
+
+@app.route("/fast_video_uploads")
+def fast_video_upload():
+    content_path = request.json["content"]
+    print(content_path, flush=True)
+    if content_path == None:
+        content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
+    style_path = request.json["style"]
+
+    start_time = time.time()
+    stylize_folder(style_path, frame_save_path, style_frame_save_path, batch_size=batch_size, prune_level=None)
+    print("Transfer time: {}".format(time.time() - start_time))
+    return ""
 
 
 @click.command()
