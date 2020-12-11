@@ -5,7 +5,6 @@ import os
 import click
 import numpy as np
 import requests
-import tensorflow as tf
 from flask import Flask, render_template, request, send_file
 from PIL import Image
 from werkzeug.utils import secure_filename
