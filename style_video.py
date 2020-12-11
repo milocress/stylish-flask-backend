@@ -8,10 +8,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 from PIL import Image
-from fast_neural_style_pytorch.stylize import stylize_folder
 
 
-# VIDEO PROCESSING =====================================================
 def slice_frames(video_file, frame_save_folder, frame_name, skip_count=1):
     """ Slices a video into its frames and saves the result in test_frames/
     Args
@@ -38,7 +36,7 @@ def slice_frames(video_file, frame_save_folder, frame_name, skip_count=1):
 
 
 def combine_frames(frame_paths, output_video_folder, output_filename):
-    """images -> frames"""
+    """Combines frames into a video"""
 
     frame = cv2.imread(frame_paths[0])
     height, width, layers = frame.shape
@@ -55,9 +53,6 @@ def combine_frames(frame_paths, output_video_folder, output_filename):
     cv2.destroyAllWindows()
     video.release()
     return output_path
-
-
-# /VIDEO PROCESSING ==========================================================
 
 
 def crop_center(image):
@@ -335,41 +330,6 @@ def style_transfer_video_file(content_video_path, style_image_path, use_tflite):
     print(f"Time to combine {time.time() - start_time}")
 
     return video_filename
-
-
-def fast_style_transfer_video_file(content_video_path, style_path):
-    """
-    Video style transfer for a given content video file fname
-
-    Args
-        - content_video_path (str): filepath of content video
-        - style_path (str): filepath of pretrained style network .pth file
-    """
-    output_folder = "static"
-    video_filename = "fast_output.mp4"
-    start_time = time.time()
-    n_frames = slice_frames(
-        content_video_path, 
-        frame_save_folder="fast_frames/content_folder", 
-        frame_name="testframe"
-    )
-
-    print(f"Time to slice up {time.time() - start_time} for {n_frames} frames")
-
-    start_time = time.time()
-
-    content_frame_save_path = "fast_frames"
-    style_frame_save_path = "fast_output_frames"
-    frame_paths = stylize_folder(style_path, content_frame_save_path, style_frame_save_path, batch_size=1)
-
-    print(f"Time to style transfer {time.time() - start_time}")
-
-    start_time = time.time()
-    output_path = combine_frames(frame_paths, output_folder, video_filename)
-    print(f"Time to combine {time.time() - start_time}")
-
-    return video_filename
-
 
 
 if __name__ == "__main__":

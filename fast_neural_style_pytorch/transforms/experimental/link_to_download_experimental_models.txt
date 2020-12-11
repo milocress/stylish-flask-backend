@@ -1,3 +1,0 @@
-gdrive:     https://drive.google.com/drive/folders/1KaunaWgx5vTRzZZqcksIigxm1evdne7S
-
-dropbox:    https://www.dropbox.com/sh/0uidsm0rkd31aew/AABK4VOfsH4xkILRi8Yvn-9Pa?dl=0

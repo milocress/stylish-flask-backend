@@ -1,6 +1,0 @@
-dataset/
-__pycache__/
-.DS_STORE
-frames/content_folder/*.jpg
-style_frames/*.jpg
-*.mp4

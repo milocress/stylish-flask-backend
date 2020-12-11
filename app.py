@@ -11,7 +11,6 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 
 import style_video
-from fast_neural_style_pytorch.stylize import stylize
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 dirname = os.path.dirname(__file__)
