@@ -137,5 +137,5 @@ if __name__ == "__main__":
 
 def create_app():
     app.api_url = REMOTE_URL
-    app.use_tflite = lite
+    app.use_tflite = False
     return app
