@@ -34,7 +34,6 @@ def show_index():
 def get_url_form():
     return render_template("url_form.html")
 
-
 @app.route("/upload_form")
 def get_upload_form():
     return render_template("upload_form.html")
