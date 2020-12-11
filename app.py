@@ -116,7 +116,7 @@ def image_upload():
     file_object.seek(0)
 
     return send_file(file_object, mimetype="image/PNG")
-    
+
 
 @click.command()
 @click.option("--local/--remote", default=True)
@@ -136,4 +136,6 @@ if __name__ == "__main__":
 
 
 def create_app():
+    app.api_url = REMOTE_URL
+    app.use_tflite = lite
     return app
