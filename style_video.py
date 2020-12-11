@@ -8,6 +8,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 from PIL import Image
+
 from fast_neural_style_pytorch.stylize import stylize_folder
 
 
@@ -69,9 +70,9 @@ def fast_style_transfer_video_file(content_video_path, style_path):
     video_filename = "fast_output.mp4"
     start_time = time.time()
     n_frames = slice_frames(
-        content_video_path, 
-        frame_save_folder="fast_frames/content_folder", 
-        frame_name="testframe"
+        content_video_path,
+        frame_save_folder="fast_frames/content_folder",
+        frame_name="testframe",
     )
 
     print(f"Time to slice up {time.time() - start_time} for {n_frames} frames")
@@ -80,7 +81,9 @@ def fast_style_transfer_video_file(content_video_path, style_path):
 
     content_frame_save_path = "fast_frames"
     style_frame_save_path = "fast_output_frames"
-    frame_paths = stylize_folder(style_path, content_frame_save_path, style_frame_save_path, batch_size=1)
+    frame_paths = stylize_folder(
+        style_path, content_frame_save_path, style_frame_save_path, batch_size=1
+    )
 
     print(f"Time to style transfer {time.time() - start_time}")
 
@@ -89,7 +92,6 @@ def fast_style_transfer_video_file(content_video_path, style_path):
     print(f"Time to combine {time.time() - start_time}")
 
     return video_filename
-
 
 
 if __name__ == "__main__":

@@ -106,13 +106,7 @@ def fast_video_upload():
     if content_path == None:
         content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
     style_path = request.json["style"]
-    # TODO: add code to slice up content into frames
-    content_frame_save_path = "test_frames"
-    style_frame_save_path = "output_frames"
-    styled_video_path = fast_style_transfer_video_file(
-        content_path,
-        style_path,
-    )
+    styled_video_path = fast_style_transfer_video_file(content_path, style_path,)
     return styled_video_path
 
 
@@ -126,7 +120,7 @@ def main(local, lite):
         app.api_url = REMOTE_URL
 
     app.use_tflite = lite
-    app.run(debug=False) # change to False for actual deployment
+    app.run(debug=False)  # change to False for actual deployment
 
 
 if __name__ == "__main__":

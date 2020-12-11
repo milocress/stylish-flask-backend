@@ -161,5 +161,6 @@ def stylize_folder(
     print(f"Transfer time is {time.time() - start_time}")
     return frame_paths
 
+
 if __name__ == "__main__":
     stylize()
