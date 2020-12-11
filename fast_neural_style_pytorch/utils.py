@@ -82,7 +82,16 @@ def ttoi(tensor):
 
     # Transpose from [C, H, W] -> [H, W, C]
     img = img.transpose(1, 2, 0)
+    print(img)
     return img
+
+
+def array_to_PIL(array):
+    array_to_PIL_transform = transforms.Compose(
+            [transforms.ToPILImage()
+            ]
+        )
+    return array_to_PIL_transform(array)
 
 
 def transfer_color(src, dest):

@@ -10,6 +10,7 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 
 from fast_neural_style_pytorch.stylize import stylize
+from fast_neural_style_pytorch.utils import array_to_PIL
 from style_video import fast_style_transfer_video_file
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
@@ -89,8 +90,8 @@ def fast_image_upload():
     if content_path == None:
         content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
     style_path = request.json["style"]
-    img = tf.keras.preprocessing.image.array_to_img(
-        stylize(content_path, style_path), data_format=None, scale=True, dtype=None
+    img = array_to_PIL(
+        stylize(content_path, style_path),
     )
     file_object = io.BytesIO()
     img.save(file_object, "PNG")
