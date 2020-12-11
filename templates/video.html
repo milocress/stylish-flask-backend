@@ -5,12 +5,14 @@
 </head>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+<br>
 <h1 class="headers">Success: Styled Video Here:</h1>
 <body>
-    <video controls>
+    <video  style="display:block; margin: 0 auto;" controls>
     	<source src="{{url_for('static', filename=filename)}}"  type="video/mp4"></source>
     </video>
     <!-- <img src="/static/dancing.jpg" alt="User Image"> -->
+<br>
 <h2 class="headers">Upload new file here:</h2>
 <form action = "/upload_form" method="POST" enctype=multipart/form-data>
     <div id = "filediv"> 
