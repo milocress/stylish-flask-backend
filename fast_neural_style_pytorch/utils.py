@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torchvision import datasets, transforms
+from PIL import Image
 
 
 # Gram Matrix
@@ -87,11 +88,12 @@ def ttoi(tensor):
 
 
 def array_to_PIL(array):
-    array_to_PIL_transform = transforms.Compose(
-            [transforms.ToPILImage()
-            ]
-        )
-    return array_to_PIL_transform(array)
+    return Image.fromarray(np.uint8(array)).convert('RGB')
+    # array_to_PIL_transform = transforms.Compose(
+    #         [transforms.ToPILImage()
+    #         ]
+    #     )
+    # return array_to_PIL_transform(array)
 
 
 def transfer_color(src, dest):
