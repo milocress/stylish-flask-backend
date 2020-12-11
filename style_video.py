@@ -8,10 +8,11 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 from PIL import Image
+from fast_neural_style_pytorch.stylize import stylize_folder
 
 
 # VIDEO PROCESSING =====================================================
-def slice_frames(video_file):
+def slice_frames(video_file, frame_save_folder, frame_name, skip_count=1):
     """ Slices a video into its frames and saves the result in test_frames/
     Args
         video_file (str): path name of video to slice up
@@ -20,19 +21,13 @@ def slice_frames(video_file):
     """
     cap = cv2.VideoCapture(video_file)
 
-    idx = 0
     framecount = 0
-    frame_skip = 0
     while cap.isOpened():
         ret, frame = cap.read()
-        if ret:
-            if idx == frame_skip:
-                filename = "test_frames/testframe" + str(framecount) + ".jpg"
-                cv2.imwrite(filename, frame)
-                framecount += 1
-                idx = 0
-            else:
-                idx += 1
+        if ret and not (framecount % skip_count):
+            filename = os.path.join(frame_save_folder, f"{frame_name}{framecount}.jpg")
+            cv2.imwrite(filename, frame)
+            framecount += 1
         else:
             break
 
@@ -258,7 +253,6 @@ def style_transfer_video_lite(n_frames, style_image_path=None):
         # Set model input.
         input_details = interpreter.get_input_details()
         interpreter.allocate_tensors()
-        # print(input_details)
         start_time = time.time()
         # Set model inputs.
         interpreter.set_tensor(input_details[0]["index"], content_image)
@@ -321,10 +315,10 @@ def style_transfer_video_file(content_video_path, style_image_path, use_tflite):
         - content_video_path (str): filepath of content video
         - style_image_path (str): filepath of style image
     """
-    output_folder = "output_videos"
+    output_folder = "static"
     video_filename = "output.mp4"
     start_time = time.time()
-    n_frames = slice_frames(content_video_path)
+    n_frames = slice_frames(content_video_path, "test_frames", "testframe")
     print(f"Time to slice up {time.time() - start_time} for {n_frames} frames")
 
     start_time = time.time()
@@ -341,6 +335,41 @@ def style_transfer_video_file(content_video_path, style_image_path, use_tflite):
     print(f"Time to combine {time.time() - start_time}")
 
     return video_filename
+
+
+def fast_style_transfer_video_file(content_video_path, style_path):
+    """
+    Video style transfer for a given content video file fname
+
+    Args
+        - content_video_path (str): filepath of content video
+        - style_path (str): filepath of pretrained style network .pth file
+    """
+    output_folder = "static"
+    video_filename = "fast_output.mp4"
+    start_time = time.time()
+    n_frames = slice_frames(
+        content_video_path, 
+        frame_save_folder="fast_frames/content_folder", 
+        frame_name="testframe"
+    )
+
+    print(f"Time to slice up {time.time() - start_time} for {n_frames} frames")
+
+    start_time = time.time()
+
+    content_frame_save_path = "fast_frames"
+    style_frame_save_path = "fast_output_frames"
+    frame_paths = stylize_folder(style_path, content_frame_save_path, style_frame_save_path, batch_size=1)
+
+    print(f"Time to style transfer {time.time() - start_time}")
+
+    start_time = time.time()
+    output_path = combine_frames(frame_paths, output_folder, video_filename)
+    print(f"Time to combine {time.time() - start_time}")
+
+    return video_filename
+
 
 
 if __name__ == "__main__":

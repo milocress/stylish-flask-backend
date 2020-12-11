@@ -46,30 +46,9 @@ def my_form_post():
     content = request.form["content url"]
     style = request.form["style url"]
 
-    # api_url = "https://stylish-videos.herokuapp.com/image_urls"
     data = {"content": content, "style": style}
     r = requests.get(url=f"{app.api_url}/image_urls", json=data)
     file_object = io.BytesIO(r._content)
-
-    return send_file(file_object, mimetype="image/PNG")
-
-
-@app.route("/image_urls")
-def image_urls():
-    content_image_url = request.json["content"]  # if key doesn't exist, returns None
-    style_image_url = request.json["style"]
-
-    content_image_path = style_video.get_image_path_from_url(content_image_url)
-    style_image_path = style_video.get_image_path_from_url(style_image_url)
-
-    content_image = style_video.get_content_image_from_path(content_image_path)
-    style_image = style_video.preprocesses_style_image(style_image_path)
-
-    img = style_video.get_style_transfer(content_image, 0, style_image, True)
-
-    file_object = io.BytesIO()
-    img.save(file_object, "PNG")
-    file_object.seek(0)
 
     return send_file(file_object, mimetype="image/PNG")
 
@@ -178,12 +157,21 @@ def fast_upload_file():
             filepath1 = os.path.join(app.config["UPLOAD_FOLDER"], filename1)
             file1.save(filepath1)
             print(filepath1)
-            data = {"content": filepath1, "style": stylepath}
-            # print(filepath1, flush=True)
-            r = requests.get(url=f"{app.api_url}/fast_image_uploads", json=data)
-            file_object = io.BytesIO(r._content)
+            data = {"content": filepath1, "style": stylepath, "lite": app.use_tflite}
+            content_filetype = FILE_TYPE[extension(file1.filename)]
 
-            return send_file(file_object, mimetype="image/PNG")
+            if content_filetype == "video":
+                r = requests.get(url=f"{app.api_url}/fast_video_uploads", json=data)
+                return render_template(
+                    "video.html",
+                    filename=r._content.decode("ascii"),
+                    filetype=content_filetype,
+                )
+            else:
+                r = requests.get(url=f"{app.api_url}/fast_image_uploads", json=data)
+                file_object = io.BytesIO(r._content)
+
+                return send_file(file_object, mimetype="image/PNG")
 
     return render_template("fast_form.html")
 
@@ -204,6 +192,23 @@ def fast_image_upload():
     return send_file(file_object, mimetype="image/PNG")
 
 
+@app.route("/fast_video_uploads")
+def fast_video_upload():
+    content_path = request.json["content"]
+    print(content_path, flush=True)
+    if content_path == None:
+        content_path = "fast_neural_style_pytorch/images/tokyo2.jpg"
+    style_path = request.json["style"]
+    # TODO: add code to slice up content into frames
+    content_frame_save_path = "test_frames"
+    style_frame_save_path = "output_frames"
+    styled_video_path = style_video.fast_style_transfer_video_file(
+        content_path,
+        style_path,
+    )
+    return styled_video_path
+
+
 @click.command()
 @click.option("--local/--remote", default=True)
 @click.option("--lite/--no-lite", default=False)
@@ -214,7 +219,7 @@ def main(local, lite):
         app.api_url = REMOTE_URL
 
     app.use_tflite = lite
-    app.run(debug=True)
+    app.run(debug=False) # change to False for actual deployment
 
 
 if __name__ == "__main__":
